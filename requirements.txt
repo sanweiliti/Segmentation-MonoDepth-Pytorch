@@ -1,0 +1,13 @@
+matplotlib==2.2.2
+numpy==1.14.2
+scipy==1.0.1
+torch==0.4.1
+torchvision==0.2.1
+tqdm==4.23.0
+pydensecrf
+protobuf
+tensorboardX
+blessings
+progressbar2
+path.py
+imageio
