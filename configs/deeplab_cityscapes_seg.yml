@@ -1,0 +1,29 @@
+model:
+    arch: deeplab
+task: seg
+data:
+    dataset: cityscapes
+    train_split: train
+    val_split: val
+    img_rows: 512
+    img_cols: 1024
+    img_norm: True
+#    version: cityscapes
+    path: ../pytorch-semseg/datasets/cityscapes
+
+training:
+    train_iters: 200000
+    batch_size: 2
+    val_interval: 1500
+    n_workers: 2
+    print_interval: 100
+    optimizer:
+        name: 'adam'
+        lr: 1.0e-4
+    loss:
+        name: 'cross_entropy'
+        size_average: True
+#    augmentations:
+#        rcrop: [256, 512]
+    lr_schedule:
+    resume:

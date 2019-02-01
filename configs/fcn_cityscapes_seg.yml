@@ -1,0 +1,31 @@
+model:
+    arch: fcn
+task: seg
+data:
+    dataset: cityscapes
+    train_split: train
+    val_split: val
+#    test_split: test
+    img_rows: 512
+    img_cols: 1024
+    img_norm: True
+#    version: cityscapes
+    path: ../pytorch-semseg/datasets/cityscapes
+training:
+    train_iters: 3000000
+    batch_size: 2     # for test, batch_size === 1
+    val_interval: 750
+    n_workers: 2
+    print_interval: 150
+    optimizer:
+        name: 'adam'
+        lr: 1.0e-4
+        #weight_decay: 0.0005
+        #momentum: 0.9
+    loss:
+        name: 'cross_entropy'
+        size_average: True
+    lr_schedule:
+    resume:
+#testing:
+#    trained_model: ./runs/fcn8s_cityscapes/67739_downsample1_batchSize1_withModel/fcn8s_cityscapes_best_model.pkl

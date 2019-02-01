@@ -1,0 +1,27 @@
+model:
+    arch: fcrn
+task: seg
+data:
+    dataset: cityscapes
+    train_split: train
+    val_split: val
+    img_rows: 512
+    img_cols: 1024
+    img_norm: True
+#    version: cityscapes
+    path: datasets/cityscapes
+
+training:
+    train_iters: 200000
+    batch_size: 4
+    val_interval: 750
+    n_workers: 2
+    print_interval: 150
+    optimizer:
+        name: 'adam'
+        lr: 1.0e-4
+    loss:
+        name: 'cross_entropy'
+        size_average: True
+    lr_schedule:
+    resume:

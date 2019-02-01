@@ -1,0 +1,27 @@
+model:
+    arch: fcn
+task: seg
+data:
+    dataset: kitti
+    train_split: train
+    val_split: val
+    img_rows: 256
+    img_cols: 832
+    img_norm: True
+#    version: cityscapes
+    path: ../pytorch-semseg/datasets/kitti/semantics
+
+training:
+    train_iters: 10000000
+    batch_size: 4
+    val_interval: 40
+    n_workers: 2
+    print_interval: 10
+    optimizer:
+        name: 'adam'
+        lr: 1.0e-5
+    loss:
+        name: 'cross_entropy'
+        size_average: True
+    lr_schedule:
+    resume: runs/fcn8s_cityscapes/37333/fcn8s_cityscapes_best_model.pkl

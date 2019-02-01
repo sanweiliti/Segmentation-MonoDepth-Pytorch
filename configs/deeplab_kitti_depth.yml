@@ -1,0 +1,26 @@
+model:
+    arch: deeplab
+task: depth
+data:
+    dataset: kitti
+    train_split: train
+    val_split: val
+    img_rows: 128
+    img_cols: 416
+    img_norm: True
+    path: prepared_kitti_train_data
+
+training:
+    train_iters: 100000000
+    batch_size: 4
+    val_interval: 2000
+    n_workers: 2
+    print_interval: 500
+    optimizer:
+        name: 'adam'
+        lr: 1.0e-4
+    loss:
+        name: 'scale_invariant_loss'
+        smooth: True
+    lr_schedule:
+    resume:

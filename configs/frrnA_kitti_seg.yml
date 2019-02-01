@@ -1,0 +1,28 @@
+model:
+    arch: frrn
+    model_type: A
+task: seg
+data:
+    dataset: kitti
+    train_split: train
+    val_split: val
+    img_rows: 256
+    img_cols: 832
+    img_norm: True
+#    version: cityscapes
+    path: datasets/kitti/semantics
+training:
+    train_iters: 10000000
+    batch_size: 4
+    val_interval: 40
+    n_workers: 2
+    print_interval: 10
+    optimizer:
+        name: 'adam'
+        lr: 1.0e-5
+    loss:
+        name: 'bootstrapped_cross_entropy'
+        size_average: True
+        K:  26624 # 256*832/8
+    lr_schedule:
+    resume: # runs/frrnA_cityscapes/94430/frrnA_cityscapes_best_model.pkl
