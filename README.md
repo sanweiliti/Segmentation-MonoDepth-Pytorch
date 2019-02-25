@@ -16,6 +16,7 @@ with pixel-wise saliency maps for evaluation of differences in activation range 
 # Cross experiments between two tasks:
 Test above 6 networks both for semantic segmentation and monocular depth estimation. 
 Segmentation evaluated on Cityscapes and KITTI semantics, monocular depth estimation evaluated on KITTI raw data.
+For example: for FCN, we implemented FCN on both segmentation and depth estimation task, therefore the two tasks have the same architecture, but they are trained seperately, i.e., with different parameters. 
 
 # Dataloaders for seg and depth
 * [Cityscapes](https://www.cityscapes-dataset.com/) (only implemented for segmentation)
