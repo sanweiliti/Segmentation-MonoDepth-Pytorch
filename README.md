@@ -150,7 +150,7 @@ python saliency_eval.py --model_name fcn --task seg --model_path /path/to/traine
 ```
 python saliency_iou.py --model_name fcn --model_seg_path /path/to/trained/seg/model --model_depth_path /path/to/trained/depth/model --height 256 --width 832 --sample_rate 4 --num_image 100
 ```
-Below is a histogram of FCRN architecture of a metric to compare activation range between 2 tasks. Red: semantic segmentation, purple: monocular depth estimation.
+Below is a histogram of FCRN architecture of a metric to compare activation range between 2 tasks. Red: semantic segmentation, purple: monocular depth estimation. This example demonstrates that FCRN for segmentation task has a larger activation range than FCRN for monocular depth estimation task.
 ![sample_results](fcrn_metric_0.png)
 
 ## segmentation / depth estimation results
