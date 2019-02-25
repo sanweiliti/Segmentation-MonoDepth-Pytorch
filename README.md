@@ -133,9 +133,10 @@ python demo_saliency.py --image_path /path/to/an/image --model_name fcn --task s
 ```
 
 ## pixel-wise saliency map evaluation
-We compute a saliency map for pixel pixel by all models we trained on KITTI segmentation and depth.
-Three metrics are designed for evaluation and we find out depth estimation pixels with a larger range 
-with a larger activation density than segmentation from the input image, i.e., extract more input information.
+We compute a saliency map for each pixel by all models we trained on KITTI segmentation and depth.
+Several metrics are designed for evaluation and we find out depth estimation extracts information from a larger range 
+with a larger activation density than semantic segmentation from the input image, i.e., extracts more input information.
+Run saliency_eval.py and saliency_iou.py to evaluate pixel-wise saliency maps for 2 tasks.
 Run saliency_analysis.py to get saliency evaluation results analysis and histogram visualization.
 
 ```
