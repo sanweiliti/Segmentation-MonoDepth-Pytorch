@@ -53,10 +53,11 @@ class runningScoreSeg(object):
 
 
 class runningScoreDepth(object):
-    def __init__(self):
+    def __init__(self, dataset):
         self.error_names = ['abs_diff', 'abs_rel', 'sq_rel', 'rmse', 'rmse_log', 'a1', 'a2', 'a3']
         self.metric_len = len(self.error_names)
         self.error_metric = [0 for i in range(self.metric_len)]  # [0,0,0,0,...,0]
+        self.dataset = dataset
         self.reset()
 
     def compute_errors_depth(self, gt, pred, crop=True):  # input gt, pred: numpy array, shape: [batch_size, h, w]
@@ -70,8 +71,12 @@ class runningScoreDepth(object):
         '''
         if crop:
             crop_mask = gt[0] != gt[0]
-            y1, y2 = int(0.40810811 * gt.shape[1]), int(0.99189189 * gt.shape[1])
-            x1, x2 = int(0.03594771 * gt.shape[2]), int(0.96405229 * gt.shape[2])
+            if self.dataset == 'kitti':
+                y1, y2 = int(0.40810811 * gt.shape[1]), int(0.99189189 * gt.shape[1])
+                x1, x2 = int(0.03594771 * gt.shape[2]), int(0.96405229 * gt.shape[2])
+            elif self.dataset == 'cityscapes':
+                y1, y2 = int(0.05 * gt.shape[1]), int(0.80 * gt.shape[1])
+                x1, x2 = int(0.05 * gt.shape[2]), int(0.99 * gt.shape[2])
             crop_mask[y1:y2, x1:x2] = 1
 
         for current_gt, current_pred in zip(gt, pred):  # for each image in a batch
