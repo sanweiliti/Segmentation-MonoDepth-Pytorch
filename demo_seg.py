@@ -13,19 +13,32 @@ from ptsemseg.models.dispnet_seg import *
 # image resize height and width need to match the training settings of the pretrained model
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--img_path", default='datasets/kitti/semantics/training/image_2/000193_10.png',
-                    type=str,
+parser.add_argument("--dataset", default='cityscapes', type=str, choices=["cityscapes", "kitti"])
+# datasets/kitti/semantics/training/image_2/000193_10.png
+parser.add_argument("--img_path", type=str,
+                    default='datasets/cityscapes/leftImg8bit/train/aachen/aachen_000005_000019_leftImg8bit.png',
                     help='path to the input image')
-parser.add_argument("--model_path",
-                    default='runs/dispnet_kitti_seg/86732_256_832_cityscaperPretrained_lr5/dispnet_kitti_best_model.pkl',
-                    type=str,
+parser.add_argument("--model_name", type=str, default='deeplab', choices=["fcn", "frrnA", "segnet", "deeplab", "dispnet", "fcrn"])
+parser.add_argument("--model_path", type=str,
+                    default='runs/deeplab_cityscapes_seg/11044_513_1025_train_requireF_adam_lr4_batchsize2/deeplab_cityscapes_best_model.pkl',
                     help='path to the pretrained model')
-parser.add_argument("--height", type=int, default=256, help="image resize height")
-parser.add_argument("--width", type=int, default=832, help="image resize width")
-
+parser.add_argument("--height", type=int, default=512, help="image resize height") # 256 for kitti
+parser.add_argument("--width", type=int, default=1024, help="image resize width") # 832 for kitti
 
 args = parser.parse_args()
 
+def get_model(model_name):
+    try:
+        return {
+            "fcn": fcn_seg(n_classes=19),
+            "frrnA": frrn_seg(n_classes=19, model_type="A"),
+            "segnet": segnet_seg(n_classes=19),
+            "deeplab": deeplab_seg(n_classes=19),
+            "dispnet": dispnet_seg(n_classes=19),
+            "fcrn": fcrn_seg(n_classes=19),
+        }[model_name]
+    except:
+        raise("Model {} not available".format(model_name))
 
 # 19classes, RGB of maskes
 colors = [  # [  0,   0,   0],
@@ -80,7 +93,7 @@ def main():
     img = torch.from_numpy(img).float().unsqueeze(0)
 
     # load pretrained model
-    model = dispnet_seg(n_classes=19)
+    model = get_model(args.model_name)
     # weights = torch.load(args.model_path)
     weights = torch.load(args.model_path, map_location=lambda storage, loc: storage)
     model.load_state_dict(weights['model_state'])
@@ -90,7 +103,8 @@ def main():
     pred = np.squeeze(output.data.max(1)[1].cpu().numpy(), axis=0)
 
     decoded = decode_segmap_tocolor(pred, n_classes=19)
-    m.imsave("output_predict_img/dispnet_output_seg.png", decoded)
+    # m.imsave("output_predict_img/dispnet_output_seg.png", decoded)
+    m.imsave("city_seg.png", decoded)
 
 
 if __name__ == '__main__':
