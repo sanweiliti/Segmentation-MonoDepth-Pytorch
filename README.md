@@ -16,7 +16,6 @@ with pixel-wise saliency maps for evaluation of differences in activation range 
 # Cross experiments between two tasks:
 Test above 6 networks both for semantic segmentation and monocular depth estimation. 
 Segmentation evaluated on Cityscapes and KITTI semantics, monocular depth estimation evaluated on KITTI raw data.
-For example: for FCN, we implemented FCN on both segmentation and depth estimation task, therefore the two tasks have the same architecture, but they are trained seperately, i.e., with different parameters. 
 
 # Dataloaders for seg and depth
 * [Cityscapes](https://www.cityscapes-dataset.com/) (only implemented for segmentation)
@@ -28,14 +27,15 @@ Augmentation and lr_schedule are both set to None in our experiments, so they ar
 ```yaml
 # Model Configuration
 model:
-    arch: <name> [options: 'fcn8s, frrn[A,B], segnet, deeplab'
+    arch: <name> [options: 'fcn8s, frrn[A,B], segnet, deeplab, dispnet, fcrn'
     <model_keyarg_1>:<value>
 task: [options: 'seg', 'depth']
 # Data Configuration
 data:
     dataset: <name> [options: 'cityscapes, kitti'] 
     train_split: <split_to_train_on>
-    val_split: <spit_to_validate_on>
+    val_split: <split_to_validate_on>
+    test_split: <split_to_test_on>
     img_rows: <img_height>
     img_cols: <img_width>
     path: <path/to/data>
@@ -80,6 +80,10 @@ training:
 
     # Resume from checkpoint  
     resume: <path_to_checkpoint>
+
+testing:
+    trained_model: <path_to_model_for_test>
+
 ```
 
 ## Prepare KITTI training data for depth estimation
@@ -92,7 +96,6 @@ python kitti_train_depth_prepare/prepare_train_data.py --dataset_dir /path/to/ra
 ## For training (segmentation and depth):
 ```
 python train.py --config path/to/configFile 
-
 ```
 
 ## For segmentation validation:
@@ -100,16 +103,21 @@ For Cityscapes: evaluation on the official validation set
 For KITTI: split 20% of the training set for validation
 ```
 python validate_seg.py  --config path/to/config/file  --model_path path/to/trained/model
-
 ```
 
 ## For depth test:
 Evaluated on Eigen test split of 697 images:
 ```
-python test_depth.py --model_name MODEL_NAME --model_path path/to/model --img_height 256 --img_width 832 --dataset_dir path/to/kitti/raw/data --dataset_list path/to/test/data/list/file [--pred_disp] 
+python test_depth_kitti.py --model_name MODEL_NAME --model_path path/to/model --img_height 256 --img_width 832 --dataset_dir path/to/kitti/raw/data --dataset_list path/to/test/data/list/file [--pred_disp] 
 
   --model_name   options: ["fcn", "frrnA", "segnet", "deeplab", "dispnet", "fcrn"]
   --pred_disp    only set for dispnet
+```
+Evaluated on cityscapes test set of 1532 images:
+```
+python test_depth_cityscapes.py --config path/to/configFile 
+
+  --config        config file includes model name, task, model path, etc., set 'test_split' argument to 'test' and trained_model argument
 ```
 Here the img_height and img_width need to match the training settings of the evaluated model.
 
@@ -133,10 +141,9 @@ python demo_saliency.py --image_path /path/to/an/image --model_name fcn --task s
 ```
 
 ## pixel-wise saliency map evaluation
-We compute a saliency map for each pixel by all models we trained on KITTI segmentation and depth.
-Several metrics are designed for evaluation and we find out depth estimation extracts information from a larger range 
-with a larger activation density than semantic segmentation from the input image, i.e., extracts more input information.
-Run saliency_eval.py and saliency_iou.py to evaluate pixel-wise saliency maps for 2 tasks.
+We compute a saliency map for pixel pixel by all models we trained on KITTI segmentation and depth.
+Three metrics are designed for evaluation and we find out depth estimation pixels with a larger range 
+with a larger activation density than segmentation from the input image, i.e., extract more input information.
 Run saliency_analysis.py to get saliency evaluation results analysis and histogram visualization.
 
 ```
@@ -150,8 +157,6 @@ python saliency_eval.py --model_name fcn --task seg --model_path /path/to/traine
 ```
 python saliency_iou.py --model_name fcn --model_seg_path /path/to/trained/seg/model --model_depth_path /path/to/trained/depth/model --height 256 --width 832 --sample_rate 4 --num_image 100
 ```
-Below is a histogram of FCRN architecture of a metric to compare activation range between 2 tasks. Red: semantic segmentation, purple: monocular depth estimation. This example demonstrates that FCRN for segmentation task has a larger activation range than FCRN for monocular depth estimation task.
-![sample_results](fcrn_metric_0.png)
 
 ## segmentation / depth estimation results
 Segmentation results are evaluated on Cityscapes validation set and KITTI semantics validation set.
@@ -161,7 +166,6 @@ Segmentation on Cityscapes val set:
 
 |             |     FCN    |  SegNet    | FRRN A  | DeepLab v2 |   FCRN    |  DispNet  |
 |-------------|:----------:|:----------:|:-------:|:----------:|:---------:|:---------:|
-| resolution  |  512*1024  |  512*1024  | 256*512 |  512*1024  |  512*1024 | 512*1024  |
 | batch size  |    2       |     2      | 3       |   4        |       4   |     4     |
 | mIoU        |  67.2%     |    59.0%   |  64.2%  |     68.6%  |    64.9%  |    51.0%  |
 
@@ -170,6 +174,20 @@ Segmentation on KITTI semantics val set with resolution 256*832 and batch size 4
 |             |     FCN    |  SegNet    | FRRN A  | DeepLab v2 |   FCRN    |  DispNet  |
 |-------------|:----------:|:----------:|:-------:|:----------:|:---------:|:---------:|
 | mIoU        |  64.6%     |    52.7%   |  66.8%  |     61.8%  |    60.9%  |    45.0%  |
+
+Monocular depth estimatino on cityscapes test set with batch size 2:
+
+|             |     FCN    |  SegNet    | FRRN A  | DeepLab v2 |   FCRN    |  DispNet  |
+|-------------|:----------:|:----------:|:-------:|:----------:|:---------:|:---------:|
+| resolution  |  512*1024  |  512*1024  | 256*512 |  512*1024  |  512*1024 | 512*1024  |
+|   rel       |  0.109     |    0.122   |  0.117  |     0.109  |    0.109  |    0.160  |
+|   sq_rel    |  1.041     |    1.281   |  1.297  |     0.976  |    1.045  |    2.147  |
+|   rms       |  6.205     |    7.227   |  6.699  |     6.016  |    6.186  |    8.405  |
+|  log_rms    |  0.171     |    0.214   |  0.183  |     0.166  |    0.170  |    0.240  |
+|  delta<1.25 |  0.863     |    0.836   |  0.855  |     0.871  |    0.866  |    0.777  |
+| delta<1.25^2|  0.966     |    0.953   |  0.960  |     0.970  |    0.968  |    0.922  |
+| delta<1.25^3|  0.990     |    0.984   |  0.987  |     0.991  |    0.990  |    0.970  |
+
 
 Monocular depth estimation on KITTI Eigen split with resolution 256*832 and batch size 4:
 
@@ -185,4 +203,9 @@ Monocular depth estimation on KITTI Eigen split with resolution 256*832 and batc
 
 See specific preprocessing procedure in the data loaders. 
 
+# References
+This repo benefits a lot from:
+https://github.com/meetshah1995/pytorch-semseg
+and 
+https://github.com/ClementPinard/SfmLearner-Pytorch, many thanks to authors of them. 
 
