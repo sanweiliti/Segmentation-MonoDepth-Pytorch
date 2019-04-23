@@ -51,6 +51,7 @@ class cityscapesLoader_seg(data.Dataset):
         img_size=(1024, 2048),
         augmentations=None,
         img_norm=True,
+        saliency_eval_depth=False,
         # version="cityscapes",
     ):
         """__init__
@@ -72,6 +73,7 @@ class cityscapesLoader_seg(data.Dataset):
         )
         # self.mean = np.array(self.mean_rgb[version])
         self.files = {}
+        self.saliency_eval_depth = saliency_eval_depth
 
         self.images_base = os.path.join(self.root, "leftImg8bit", self.split)
         self.annotations_base = os.path.join(
@@ -176,11 +178,15 @@ class cityscapesLoader_seg(data.Dataset):
         img = m.imresize(
             img, (self.img_size[0], self.img_size[1])
         )  # uint8 with RGB mode
-        img = img[:, :, ::-1]  # RGB -> BGR  [h, w, 3]
+        if self.saliency_eval_depth == False:
+            img = img[:, :, ::-1]  # RGB -> BGR  shape: [h, w, 3]
         img = img.astype(np.float64)
         # img -= self.mean
         if self.img_norm:
-            img = img.astype(float) / 255.0
+            if self.saliency_eval_depth == False:
+                img = img.astype(float) / 255.0
+            else:
+                img = ((img / 255 - 0.5) / 0.5)
         img = img.transpose(2, 0, 1)  # NHWC -> NCHW [3, h, w]
 
         classes = np.unique(lbl)  # all classes included in this label image
